@@ -78,7 +78,7 @@ def main():
     if module.check_mode:
         module.exit_json(changed=False, recorded=[])
     p = module.params
-    j = Journal(p["journal_dir"], p["id"], runner=lambda cmd: module.run_command(cmd))
+    j = Journal(p["journal_dir"], p["id"], runner=module.run_command)
     try:
         added = j.snapshot(p["paths"], p["packages"], p["services"], p["package_manager"])
     except (JournalError, OSError) as e:

@@ -36,8 +36,8 @@ class JournalError(Exception):
 
 
 def _run(cmd):
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-    return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, check=False)
+    return proc.returncode, proc.stdout, proc.stderr
 
 
 class Journal:
@@ -48,8 +48,13 @@ class Journal:
         self.path = os.path.join(self.root, "journal.json")
         self.files_dir = os.path.join(self.root, "files")
         self.txn_id = txn_id
-        self.run = runner
+        self._runner = runner
         self.data = None
+
+    def run(self, cmd):
+        """Run a command; output is stripped (AnsibleModule.run_command keeps the trailing newline)."""
+        rc, out, err = self._runner(cmd)
+        return rc, out.strip(), err.strip()
 
     # ------------------------------------------------------------ lifecycle
 
@@ -147,9 +152,9 @@ class Journal:
         return entry
 
     def _snapshot_service(self, name):
-        rc, out, _ = self.run(["systemctl", "is-active", name])
+        rc, out, dummy = self.run(["systemctl", "is-active", name])
         active = out == "active"
-        rc, out, _ = self.run(["systemctl", "is-enabled", name])
+        rc, out, dummy = self.run(["systemctl", "is-enabled", name])
         enabled = {"enabled": True, "disabled": False}.get(out)  # static/masked/etc: leave alone
         return {"kind": "service", "name": name, "active": active, "enabled": enabled}
 
@@ -177,7 +182,7 @@ class Journal:
         self.save()
         return restored, errors
 
-    def _restore_file(self, e, _restart):
+    def _restore_file(self, e, restart):  # pylint: disable=unused-argument
         path = e["name"]
         if not e["existed"]:
             if os.path.isdir(path) and not os.path.islink(path):
@@ -209,7 +214,7 @@ class Journal:
         os.rename(tmp, path)
         return True
 
-    def _restore_package(self, e, _restart):
+    def _restore_package(self, e, restart):  # pylint: disable=unused-argument
         current = package_version(self.run, e["manager"], e["name"])
         if current == e["version"]:
             return False
@@ -230,7 +235,7 @@ class Journal:
     def _restore_service(self, e, restart):
         name, changed = e["name"], False
         if e["enabled"] is not None:
-            rc, out, _ = self.run(["systemctl", "is-enabled", name])
+            rc, out, dummy = self.run(["systemctl", "is-enabled", name])
             if (out == "enabled") != e["enabled"]:
                 self._must(["systemctl", "enable" if e["enabled"] else "disable", name])
                 changed = True
@@ -239,7 +244,7 @@ class Journal:
             self._must(["systemctl", "restart" if restart else "start", name])
             changed = True
         else:
-            rc, out, _ = self.run(["systemctl", "is-active", name])
+            rc, out, dummy = self.run(["systemctl", "is-active", name])
             if out == "active":
                 self._must(["systemctl", "stop", name])
                 changed = True
@@ -261,9 +266,9 @@ def _same_file(a, b, e):
         return fa.read() == fb.read()
 
 
-def detect_package_manager(run=_run):
+def detect_package_manager(run):
     for mgr in ("apt", "dnf", "yum"):
-        rc, _, _ = run(["sh", "-c", "command -v %s" % ("dpkg-query" if mgr == "apt" else mgr)])
+        rc, dummy, dummy = run(["sh", "-c", "command -v %s" % ("dpkg-query" if mgr == "apt" else mgr)])
         if rc == 0:
             return mgr
     raise JournalError("no supported package manager found (apt, dnf, yum)")
@@ -272,9 +277,9 @@ def detect_package_manager(run=_run):
 def package_version(run, mgr, name):
     """Installed version, or None if not installed."""
     if mgr == "apt":
-        rc, out, _ = run(["dpkg-query", "-W", "-f=${db:Status-Abbrev}|${Version}", name])
+        rc, out, dummy = run(["dpkg-query", "-W", "-f=${db:Status-Abbrev}|${Version}", name])
         if rc != 0 or not out.startswith("ii"):
             return None
         return out.split("|", 1)[1]
-    rc, out, _ = run(["rpm", "-q", "--qf", "%{VERSION}-%{RELEASE}", name])
+    rc, out, dummy = run(["rpm", "-q", "--qf", "%{VERSION}-%{RELEASE}", name])
     return out if rc == 0 else None

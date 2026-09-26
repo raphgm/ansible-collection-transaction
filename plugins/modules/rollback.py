@@ -52,7 +52,7 @@ COMMON_ARGS = dict(id=dict(type="str", default="default"),
 def main():
     module = AnsibleModule(argument_spec=dict(COMMON_ARGS, restart_services=dict(type="bool", default=True)),
                            supports_check_mode=False)
-    j = Journal(module.params["journal_dir"], module.params["id"], runner=lambda cmd: module.run_command(cmd))
+    j = Journal(module.params["journal_dir"], module.params["id"], runner=module.run_command)
     try:
         restored, errors = j.rollback(restart_services=module.params["restart_services"])
     except (JournalError, OSError) as e:

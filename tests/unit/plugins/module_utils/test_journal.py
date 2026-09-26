@@ -19,6 +19,11 @@ class FakeHost:
         self.calls = []
 
     def __call__(self, cmd):
+        # like AnsibleModule.run_command: output keeps its trailing newline
+        rc, out, err = self.answer(cmd)
+        return rc, out + "\n" if out else out, err
+
+    def answer(self, cmd):
         self.calls.append(cmd)
         if cmd[0] == "dpkg-query":
             v = self.pkgs.get(cmd[-1])
@@ -145,7 +150,7 @@ def test_services_restored_after_files(tmp_path, journal, host):
     write(f, "bad")
     host.enabled["nginx"] = False
     host.calls.clear()
-    restored, _ = journal.rollback()
+    restored = journal.rollback()[0]
     assert restored == ["file:%s" % f, "service:nginx"]
     assert ["systemctl", "restart", "nginx"] in host.calls
     assert host.enabled["nginx"] is True
@@ -165,14 +170,14 @@ def test_errors_collected_and_rest_still_restored(tmp_path, journal, host):
     journal.snapshot(paths=[str(f)], packages=["nginx"], package_manager="apt")
     write(f, "v2")
     host.pkgs["nginx"] = "9"
-    orig = host.__call__
+    orig = host.answer
 
     def broken(cmd):
         if cmd[0] == "apt-get":
             return 100, "", "E: Version '1.24.0-1' for 'nginx' was not found"
         return orig(cmd)
-    journal.run = broken
-    restored, errors = journal.rollback()
+    host.answer = broken
+    dummy, errors = journal.rollback()
     assert f.read_text() == "v1"
     assert len(errors) == 1 and "not found" in errors[0]
     assert journal.data["status"] == ROLLBACK_FAILED
