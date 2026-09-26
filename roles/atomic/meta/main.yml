@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Raphael Gab-Momoh
+  description: Run a tasks file as a transaction that rolls back on failure
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.15"
+dependencies: []

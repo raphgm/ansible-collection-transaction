@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Run a tasks file as a transaction that rolls back on failure
+    options:
+      atomic_tasks: {type: str, required: true, description: Tasks file to run.}
+      atomic_verify: {type: str, default: "", description: Tasks file with checks; a failure rolls back.}
+      atomic_paths: {type: list, elements: str, default: [], description: Files to save.}
+      atomic_packages: {type: list, elements: str, default: [], description: Packages to save.}
+      atomic_services: {type: list, elements: str, default: [], description: systemd services to save.}
+      atomic_id: {type: str, default: default, description: Transaction name.}
+      atomic_journal_dir: {type: str, default: /var/lib/ansible-transaction, description: Journal location on host.}
+      atomic_force: {type: bool, default: false, description: Discard a leftover open transaction.}
+      atomic_keep_journal: {type: bool, default: false, description: Keep journal.json after commit.}

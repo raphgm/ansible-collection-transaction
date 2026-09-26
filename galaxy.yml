@@ -1,0 +1,13 @@
+namespace: raphgm
+name: transaction
+version: 0.1.0
+readme: README.md
+authors:
+  - Raphael Gab-Momoh (@raphgm)
+description: Transactions for Ansible plays. Snapshot state, run tasks, roll back automatically if anything fails.
+license:
+  - GPL-3.0-or-later
+tags: [rollback, transaction, deployment, infrastructure]
+repository: https://github.com/raphgm/ansible-transaction-mode
+issues: https://github.com/raphgm/ansible-transaction-mode/issues
+build_ignore: [tests/output, .git, "*.tar.gz"]

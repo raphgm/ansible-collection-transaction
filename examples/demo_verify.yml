@@ -1,0 +1,10 @@
+---
+- name: Read config
+  ansible.builtin.slurp:
+    src: "{{ demo_dir }}/app.conf"
+  register: _conf
+
+- name: Health check
+  ansible.builtin.assert:
+    that: (_conf.content | b64decode) is search('port=[0-9]+')
+    fail_msg: "port is not a number"

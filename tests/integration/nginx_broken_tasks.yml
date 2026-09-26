@@ -1,0 +1,10 @@
+---
+- name: Write invalid config
+  ansible.builtin.copy:
+    dest: /etc/nginx/conf.d/app.conf
+    content: "server { this is not valid }\n"
+
+- name: Restart nginx (fails)
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: restarted

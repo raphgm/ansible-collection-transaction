@@ -1,0 +1,50 @@
+---
+- name: Check role input
+  ansible.builtin.assert:
+    that: atomic_tasks | length > 0
+    fail_msg: "Set atomic_tasks to the tasks file you want to run as a transaction."
+    quiet: true
+
+- name: Begin transaction
+  raphgm.transaction.begin:
+    id: "{{ atomic_id }}"
+    journal_dir: "{{ atomic_journal_dir }}"
+    force: "{{ atomic_force }}"
+
+- name: Run transaction
+  block:
+    - name: Snapshot current state
+      raphgm.transaction.snapshot:
+        id: "{{ atomic_id }}"
+        journal_dir: "{{ atomic_journal_dir }}"
+        paths: "{{ atomic_paths }}"
+        packages: "{{ atomic_packages }}"
+        services: "{{ atomic_services }}"
+
+    - name: Run tasks
+      ansible.builtin.include_tasks: "{{ atomic_tasks if atomic_tasks is abs else playbook_dir ~ '/' ~ atomic_tasks }}"
+
+    - name: Verify
+      ansible.builtin.include_tasks: "{{ atomic_verify if atomic_verify is abs else playbook_dir ~ '/' ~ atomic_verify }}"
+      when: atomic_verify | length > 0
+
+    - name: Commit transaction
+      raphgm.transaction.commit:
+        id: "{{ atomic_id }}"
+        journal_dir: "{{ atomic_journal_dir }}"
+        keep_journal: "{{ atomic_keep_journal }}"
+
+  rescue:
+    - name: Roll back transaction
+      raphgm.transaction.rollback:
+        id: "{{ atomic_id }}"
+        journal_dir: "{{ atomic_journal_dir }}"
+      register: _atomic_rollback
+
+    - name: Report failure
+      ansible.builtin.fail:
+        msg: >-
+          Transaction '{{ atomic_id }}' failed at task
+          '{{ ansible_failed_task.name | default("unknown") }}' and was rolled back.
+          Restored: {{ _atomic_rollback.restored | join(', ') or 'nothing' }}.
+          Original error: {{ ansible_failed_result.msg | default('') }}

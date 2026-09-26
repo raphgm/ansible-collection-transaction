@@ -1,0 +1,13 @@
+---
+# Real-world shape: config + package + service, with an HTTP health check.
+- name: Deploy nginx site
+  hosts: webservers
+  become: true
+  roles:
+    - role: raphgm.transaction.atomic
+      vars:
+        atomic_paths: [/etc/nginx/conf.d/app.conf]
+        atomic_packages: [nginx]
+        atomic_services: [nginx]
+        atomic_tasks: web_tasks.yml
+        atomic_verify: web_verify.yml

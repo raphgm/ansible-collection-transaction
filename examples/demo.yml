@@ -1,0 +1,33 @@
+---
+# Runs on localhost with no root. A bad config is deployed, the health check
+# fails, and the original config comes back automatically.
+#   ansible-playbook examples/demo.yml
+- name: Transaction demo
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    demo_dir: /tmp/ansible-txn-demo
+  pre_tasks:
+    - name: Create demo directory
+      ansible.builtin.file:
+        path: "{{ demo_dir }}"
+        state: directory
+    - name: Start from a known good config
+      ansible.builtin.copy:
+        dest: "{{ demo_dir }}/app.conf"
+        content: "version=1\nport=8080\n"
+    - name: Clean leftovers from earlier runs
+      ansible.builtin.file:
+        path: "{{ demo_dir }}/feature.conf"
+        state: absent
+
+  roles:
+    - role: raphgm.transaction.atomic
+      vars:
+        atomic_journal_dir: "{{ demo_dir }}/journal"
+        atomic_paths:
+          - "{{ demo_dir }}/app.conf"
+          - "{{ demo_dir }}/feature.conf"
+        atomic_tasks: demo_deploy.yml
+        atomic_verify: demo_verify.yml

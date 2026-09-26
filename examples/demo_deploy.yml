@@ -1,0 +1,10 @@
+---
+- name: Deploy new config (has a bad port)
+  ansible.builtin.copy:
+    dest: "{{ demo_dir }}/app.conf"
+    content: "version=2\nport=not-a-number\n"
+
+- name: Add a new file that did not exist before
+  ansible.builtin.copy:
+    dest: "{{ demo_dir }}/feature.conf"
+    content: "enabled=true\n"

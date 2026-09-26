@@ -1,0 +1,13 @@
+---
+# Tasks file to run as one transaction (required). Relative paths resolve from the playbook directory.
+atomic_tasks: ""
+# Optional tasks file that checks the result (health checks). A failure here also rolls back.
+atomic_verify: ""
+# What to save before atomic_tasks runs.
+atomic_paths: []
+atomic_packages: []
+atomic_services: []
+atomic_id: default
+atomic_journal_dir: /var/lib/ansible-transaction
+atomic_force: false
+atomic_keep_journal: false

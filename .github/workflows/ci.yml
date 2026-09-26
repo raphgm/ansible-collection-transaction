@@ -1,0 +1,55 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ansible: [stable-2.18, stable-2.19, devel]
+    steps:
+      - uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: ${{ matrix.ansible }}
+          testing-type: sanity
+
+  units:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: stable-2.19
+          testing-type: units
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/raphgm/transaction
+      - run: pip install ansible-core
+      - name: Demo must fail, and the original config must come back
+        working-directory: ansible_collections/raphgm/transaction
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+        run: |
+          if ansible-playbook examples/demo.yml; then echo "demo should fail"; exit 1; fi
+          grep -qx 'port=8080' /tmp/ansible-txn-demo/app.conf
+          test ! -e /tmp/ansible-txn-demo/feature.conf
+
+  nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/raphgm/transaction
+      - run: sudo apt-get update && sudo apt-get install -y nginx && pip install ansible-core
+      - name: Broken nginx config is rolled back and nginx keeps serving
+        working-directory: ansible_collections/raphgm/transaction
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+        run: |
+          echo 'server { listen 8081; location / { return 200 "v1"; } }' | sudo tee /etc/nginx/conf.d/app.conf
+          sudo systemctl restart nginx && curl -sf localhost:8081
+          if ansible-playbook -i localhost, -c local tests/integration/nginx_broken.yml; then exit 1; fi
+          curl -sf localhost:8081 | grep -qx v1

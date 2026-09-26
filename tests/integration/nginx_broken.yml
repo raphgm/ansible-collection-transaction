@@ -1,0 +1,11 @@
+---
+- name: Deploy a config that breaks nginx
+  hosts: localhost
+  become: true
+  gather_facts: false
+  roles:
+    - role: raphgm.transaction.atomic
+      vars:
+        atomic_paths: [/etc/nginx/conf.d/app.conf]
+        atomic_services: [nginx]
+        atomic_tasks: nginx_broken_tasks.yml

@@ -41,3 +41,6 @@ ENV/
 
 # Temporary journal storage
 /tmp/.ansible_journal*
+tests/output/
+*.tar.gz
+__pycache__/
