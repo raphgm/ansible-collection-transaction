@@ -29,7 +29,7 @@ on the old config. Then the play fails with a clear message saying what was rest
 No root and no remote host needed:
 
 ```bash
-git clone https://github.com/raphgm/ansible-transaction-mode ansible_collections/raphgm/transaction
+git clone https://github.com/raphgm/ansible-collection-transaction ansible_collections/raphgm/transaction
 cd ansible_collections/raphgm/transaction
 ANSIBLE_COLLECTIONS_PATH=../../.. ansible-playbook examples/demo.yml
 cat /tmp/ansible-txn-demo/app.conf   # still version=1: the bad deploy was undone
@@ -103,7 +103,7 @@ or discard the old transaction with `force: true` (`atomic_force: true` in the r
 - A small hook in `ansible-core` that would make this work with no list at all. The
   design is in [docs/design.md](docs/design.md). This collection is the proof of concept for it.
 
-Feedback and bug reports are welcome in [issues](https://github.com/raphgm/ansible-transaction-mode/issues).
+Feedback and bug reports are welcome in [issues](https://github.com/raphgm/ansible-collection-transaction/issues).
 
 ## Development
 

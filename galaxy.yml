@@ -8,6 +8,6 @@ description: Transactions for Ansible plays. Snapshot state, run tasks, roll bac
 license:
   - GPL-3.0-or-later
 tags: [rollback, transaction, deployment, infrastructure]
-repository: https://github.com/raphgm/ansible-transaction-mode
-issues: https://github.com/raphgm/ansible-transaction-mode/issues
+repository: https://github.com/raphgm/ansible-collection-transaction
+issues: https://github.com/raphgm/ansible-collection-transaction/issues
 build_ignore: [tests/output, .git, "*.tar.gz"]

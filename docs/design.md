@@ -237,18 +237,18 @@ flowchart TD
 
 This repository provides the complete, working implementation package and proposal:
 
-* **[AEP-0082 Proposal](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/AEP-0082-ansible-transaction-mode.md)**: 15+ page formal Ansible Enhancement Proposal formatted for Red Hat / Ansible Core maintainers.
-* **[State Machine & Architecture](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/architecture/state_machine.md)**: Sequence diagrams and failure handling taxonomy.
-* **[Journal Schema Spec](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/architecture/journal_spec.md)**: JSON Schema 2020-12 specification for `ATJ-v1`.
-* 🐍 **[Implementation Engine (Python 3.10+)](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/)**:
-  - [`rollback_manager.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/executor/rollback_manager.py): Transaction journals, LIFO reverser, disk persistence.
-  - [`task_executor.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/executor/task_executor.py): Core failure interception and automated rollback dispatch.
-  - [`play_context.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/playbook/play_context.py): Keyword parsing for `atomic` and `rollback_policy`.
-  - [`basic.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/module_utils/basic.py): Module mixin for undo registration.
-  - Module adapters for [`copy.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/modules/files/copy.py) and [`service.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/implementation/lib/ansible/modules/system/service.py).
-* 🐍 **[Python Test Suite](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/tests/unit/executor/test_rollback_manager.py)**: 9 comprehensive unit tests (100% passing).
-* **[Performance Benchmarks](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/benchmarks/overhead_analysis.md)**: Overhead analysis showing < 3.5% execution penalty.
-* **[Upstream PR Template](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-transaction-mode/docs/PR_DESCRIPTION.md)**: Ready-to-file GitHub PR description for the `ansible/ansible` `devel` branch.
+* **[AEP-0082 Proposal](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/AEP-0082-ansible-collection-transaction.md)**: 15+ page formal Ansible Enhancement Proposal formatted for Red Hat / Ansible Core maintainers.
+* **[State Machine & Architecture](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/architecture/state_machine.md)**: Sequence diagrams and failure handling taxonomy.
+* **[Journal Schema Spec](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/architecture/journal_spec.md)**: JSON Schema 2020-12 specification for `ATJ-v1`.
+* 🐍 **[Implementation Engine (Python 3.10+)](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/)**:
+  - [`rollback_manager.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/executor/rollback_manager.py): Transaction journals, LIFO reverser, disk persistence.
+  - [`task_executor.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/executor/task_executor.py): Core failure interception and automated rollback dispatch.
+  - [`play_context.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/playbook/play_context.py): Keyword parsing for `atomic` and `rollback_policy`.
+  - [`basic.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/module_utils/basic.py): Module mixin for undo registration.
+  - Module adapters for [`copy.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/modules/files/copy.py) and [`service.py`](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/implementation/lib/ansible/modules/system/service.py).
+* 🐍 **[Python Test Suite](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/tests/unit/executor/test_rollback_manager.py)**: 9 comprehensive unit tests (100% passing).
+* **[Performance Benchmarks](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/benchmarks/overhead_analysis.md)**: Overhead analysis showing < 3.5% execution penalty.
+* **[Upstream PR Template](file:///Users/raphaelgab-momoh/Documents/GabraOs/ansible-collection-transaction/docs/PR_DESCRIPTION.md)**: Ready-to-file GitHub PR description for the `ansible/ansible` `devel` branch.
 
 ---
 
@@ -257,7 +257,7 @@ This repository provides the complete, working implementation package and propos
 Run the full unit test suite directly:
 
 ```bash
-cd ansible-transaction-mode
+cd ansible-collection-transaction
 python3 -m unittest discover -s tests/unit/executor -p "test_*.py" -v
 ```
 
