@@ -19,7 +19,6 @@ import json
 import os
 import shutil
 import stat
-import subprocess
 import time
 
 DEFAULT_JOURNAL_DIR = "/var/lib/ansible-transaction"
@@ -35,13 +34,8 @@ class JournalError(Exception):
     pass
 
 
-def _run(cmd):
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, check=False)
-    return proc.returncode, proc.stdout, proc.stderr
-
-
 class Journal:
-    def __init__(self, journal_dir, txn_id, runner=_run):
+    def __init__(self, journal_dir, txn_id, runner=None):
         if not txn_id or "/" in txn_id or txn_id in (".", ".."):
             raise JournalError("invalid transaction id: %r" % txn_id)
         self.root = os.path.join(journal_dir, txn_id)
@@ -53,6 +47,8 @@ class Journal:
 
     def run(self, cmd):
         """Run a command; output is stripped (AnsibleModule.run_command keeps the trailing newline)."""
+        if self._runner is None:
+            raise JournalError("no command runner configured")
         rc, out, err = self._runner(cmd)
         return rc, out.strip(), err.strip()
 
